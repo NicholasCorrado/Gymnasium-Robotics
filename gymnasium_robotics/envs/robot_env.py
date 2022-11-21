@@ -95,7 +95,7 @@ class BaseRobotEnv(GoalEnv):
         # )
         self.render_mode = render_mode
 
-        self.observation_space = spaces.Box(-np.inf, +np.inf, shape=obs.shape, dtype="float64")
+        self.observation_space = spaces.Box(-np.inf, +np.inf, shape=obs.shape, dtype="float32")
 
         self.desired_mask = np.zeros_like(obs, dtype=bool)
         self.achieved_mask = np.zeros_like(obs, dtype=bool)

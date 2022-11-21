@@ -177,3 +177,8 @@ class MujocoFetchSlideEnv(MujocoFetchEnv, EzPickle):
             **kwargs,
         )
         EzPickle.__init__(self, reward_type=reward_type, **kwargs)
+
+    def _set_masks(self):
+        self.desired_mask[-3:] = 1
+        self.achieved_mask[3:6] = 1
+
