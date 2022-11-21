@@ -176,4 +176,6 @@ class MujocoFetchPushEnv(MujocoFetchEnv, EzPickle):
             reward_type=reward_type,
             **kwargs,
         )
+        self.desired_mask[-3:] = 1
+        self.achieved_mask[3:6] = 1
         EzPickle.__init__(self, reward_type=reward_type, **kwargs)

@@ -1,5 +1,6 @@
 import os
 
+import numpy as np
 from gymnasium.utils.ezpickle import EzPickle
 
 from gymnasium_robotics.envs.fetch_env import MujocoFetchEnv, MujocoPyFetchEnv
@@ -18,7 +19,7 @@ class MujocoFetchReachEnv(MujocoFetchEnv, EzPickle):
     The robot is controlled by small displacements of the gripper in Cartesian coordinates and the inverse kinematics are computed internally by the MuJoCo framework. The task is also continuing which means that the robot has to maintain the end effector's
     position for an indefinite period of time.
 
-    The control frequency of the robot is of `f = 25 Hz`. This is achieved by applying the same action in 20 subsequent simulator step (with a time step of `dt = 0.002 s`) before returning the control to the robot.
+    Te control frequency of the robot is of `f = 25 Hz`. This is achieved by applying the same action in 20 subsequent simulator step (with a time step of `dt = 0.002 s`) before returning the control to the robot.
 
     ## Action Space
 
@@ -133,7 +134,12 @@ class MujocoFetchReachEnv(MujocoFetchEnv, EzPickle):
             reward_type=reward_type,
             **kwargs,
         )
+
         EzPickle.__init__(self, reward_type=reward_type, **kwargs)
+
+    def _set_masks(self):
+        self.desired_mask[-3:] = 1
+        self.achieved_mask[:3] = 1
 
 
 class MujocoPyFetchReachEnv(MujocoPyFetchEnv, EzPickle):

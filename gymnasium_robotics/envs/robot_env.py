@@ -5,6 +5,7 @@ from typing import Optional, Union
 import gymnasium as gym
 import numpy as np
 from gymnasium import error, logger, spaces
+from gym import spaces
 
 from gymnasium_robotics import GoalEnv
 
@@ -71,7 +72,7 @@ class BaseRobotEnv(GoalEnv):
         self.viewer = None
         self._viewers = {}
 
-        self.goal = np.zeros(0)
+        self.goal = np.zeros(3)
         obs = self._get_obs()
 
         assert (
@@ -79,21 +80,29 @@ class BaseRobotEnv(GoalEnv):
         ), f'Expected value: {int(np.round(1.0 / self.dt))}, Actual value: {self.metadata["render_fps"]}'
 
         self.action_space = spaces.Box(-1.0, 1.0, shape=(n_actions,), dtype="float32")
-        self.observation_space = spaces.Dict(
-            dict(
-                desired_goal=spaces.Box(
-                    -np.inf, np.inf, shape=obs["achieved_goal"].shape, dtype="float64"
-                ),
-                achieved_goal=spaces.Box(
-                    -np.inf, np.inf, shape=obs["achieved_goal"].shape, dtype="float64"
-                ),
-                observation=spaces.Box(
-                    -np.inf, np.inf, shape=obs["observation"].shape, dtype="float64"
-                ),
-            )
-        )
-
+        # self.observation_space = spaces.Dict(
+        #     dict(
+        #         desired_goal=spaces.Box(
+        #             -np.inf, np.inf, shape=obs["achieved_goal"].shape, dtype="float64"
+        #         ),
+        #         achieved_goal=spaces.Box(
+        #             -np.inf, np.inf, shape=obs["achieved_goal"].shape, dtype="float64"
+        #         ),
+        #         observation=spaces.Box(
+        #             -np.inf, np.inf, shape=obs["observation"].shape, dtype="float64"
+        #         ),
+        #     )
+        # )
         self.render_mode = render_mode
+
+        self.observation_space = spaces.Box(-np.inf, +np.inf, shape=obs.shape, dtype="float64")
+
+        self.desired_mask = np.zeros_like(obs, dtype=bool)
+        self.achieved_mask = np.zeros_like(obs, dtype=bool)
+        self._set_masks()
+
+    def _set_masks(self):
+        NotImplementedError("Not Implemented")
 
     # Env methods
     # ----------------------------
@@ -120,14 +129,11 @@ class BaseRobotEnv(GoalEnv):
             self.render()
         obs = self._get_obs()
 
-        info = {
-            "is_success": self._is_success(obs["achieved_goal"], self.goal),
-        }
-
-        terminated = self.compute_terminated(obs["achieved_goal"], self.goal, info)
-        truncated = self.compute_truncated(obs["achieved_goal"], self.goal, info)
-
-        reward = self.compute_reward(obs["achieved_goal"], self.goal, info)
+        info = {}
+        achieved_goal = obs[self.achieved_mask]
+        terminated = self.compute_terminated(achieved_goal, self.goal, info)
+        truncated = self.compute_truncated(achieved_goal, self.goal, info)
+        reward = self.compute_reward(achieved_goal, self.goal, info)
 
         return obs, reward, terminated, truncated, info
 
@@ -188,7 +194,7 @@ class BaseRobotEnv(GoalEnv):
         """Applies the given action to the simulation."""
         raise NotImplementedError()
 
-    def _is_success(self, achieved_goal, desired_goal):
+    def is_success(self, achieved_goal, desired_goal):
         """Indicates whether or not the achieved goal successfully achieved the desired goal."""
         raise NotImplementedError()
 

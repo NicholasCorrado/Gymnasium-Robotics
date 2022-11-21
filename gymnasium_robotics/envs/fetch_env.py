@@ -126,14 +126,16 @@ def get_base_fetch_env(RobotEnvClass: Union[MujocoPyRobotEnv, MujocoRobotEnv]):
                     object_velr.ravel(),
                     grip_velp,
                     gripper_vel,
+                    self.goal.copy()
                 ]
             )
 
-            return {
-                "observation": obs.copy(),
-                "achieved_goal": achieved_goal.copy(),
-                "desired_goal": self.goal.copy(),
-            }
+            return obs
+            # return {
+            #     "observation": obs.copy(),
+            #     "achieved_goal": achieved_goal.copy(),
+            #     "desired_goal": self.goal.copy(),
+            # }
 
         def generate_mujoco_observations(self):
 
@@ -166,7 +168,7 @@ def get_base_fetch_env(RobotEnvClass: Union[MujocoPyRobotEnv, MujocoRobotEnv]):
                 )
             return goal.copy()
 
-        def _is_success(self, achieved_goal, desired_goal):
+        def is_success(self, achieved_goal, desired_goal):
             d = goal_distance(achieved_goal, desired_goal)
             return (d < self.distance_threshold).astype(np.float32)
 
