@@ -5,6 +5,7 @@ from typing import Optional, Union
 import gymnasium as gym
 import numpy as np
 from gymnasium import error, logger, spaces
+from gym import spaces
 
 from gymnasium_robotics import GoalEnv
 

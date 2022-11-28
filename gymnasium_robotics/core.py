@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Optional
 
-import gymnasium as gym
+import gym
 from gymnasium import error
 
 
